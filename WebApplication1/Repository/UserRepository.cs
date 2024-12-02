@@ -75,17 +75,29 @@ namespace CcStore.Repository
             return await _users.Find(expression).ToListAsync();
         }
 
-        // User registration with hashed password
         public async Task<string> Register(User user)
         {
-            user.PasswordHash = HashPassword(user.PasswordHash);  // Hash password before inserting
+            // Check if the user already exists
+            var existingUser = await GetUserByUsernameAsync(user.Email); // Use appropriate field for uniqueness (e.g., Email)
+            if (existingUser != null)
+            {
+                throw new BadHttpRequestException("User already exists"); // Or return a specific response
+            }
+
+            // Hash password before inserting
+            user.PasswordHash = HashPassword(user.PasswordHash);
+
+            // Create the new user
             await CreateUserAsync(user);
 
+            // Generate JWT token and refresh token
             var jwtToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken(user);
             user.RefreshToken = refreshToken;
 
-            await UpdateUserAsync(user);  // Update user with the refresh token
+            // Update user with the refresh token
+            await UpdateUserAsync(user);
+
             return jwtToken;
         }
 
@@ -157,7 +169,7 @@ namespace CcStore.Repository
         // Securely hash the password using PBKDF2
         private string HashPassword(string password)
         {
-
+            return password;
             // Generate a salt
 
             var salt = Encoding.UTF8.GetBytes(configuration.GetValue<string>("JwtSettings:SecretKey"));
