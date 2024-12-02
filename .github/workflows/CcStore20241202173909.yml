@@ -46,9 +46,10 @@ jobs:
     - name: Add .NET Tools to PATH
       run: echo "${{ runner.tool_cache }}/dotnet/tools" >> $GITHUB_PATH
     - name: Verify Swashbuckle CLI Tool
-      run: dotnet swagger --version
+      run: dotnet tool list --global
     - name: Generate Swagger JSON
-      run: dotnet swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
+      run: |
+        dotnet tool run swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
