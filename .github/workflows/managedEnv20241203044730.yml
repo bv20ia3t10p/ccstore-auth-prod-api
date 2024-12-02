@@ -1,0 +1,36 @@
+on:
+  push:
+    branches:
+    - master
+env:
+  DOTNET_CORE_VERSION: 8.0.x
+  CONTAINER_APP_NAME: ccstore-container-app
+  CONTAINER_APP_ENVIRONMENT_NAME: managedEnv20241203044730
+  RESOURCE_GROUP: asia
+  CONTAINER_REGISTRY_NAME: registry20241203053026
+  CONTAINER_REGISTRY_LOGIN_SERVER: registry20241203053026.azurecr.io
+jobs:
+  BuildAndDeployContainerApp:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.managedEnv20241203044730_SPN }}
+    - name: Container App deploy
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        appSourcePath: ${{ github.workspace }}
+        acrName: ${{ env.CONTAINER_REGISTRY_NAME }}
+        acrUsername: ${{ secrets.registry20241203053026_USERNAME_3D47 }}
+        acrPassword: ${{ secrets.registry20241203053026_PASSWORD_3D47 }}
+        imageToBuild: ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.CONTAINER_APP_NAME }}:${{ github.sha }}
+        containerAppName: ${{ env.CONTAINER_APP_NAME }}
+        containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT_NAME }}
+        resourceGroup: ${{ env.RESOURCE_GROUP }}
