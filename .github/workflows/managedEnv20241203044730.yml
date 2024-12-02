@@ -19,10 +19,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-    - name: Azure Login
+    - name: Azure login
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.CcStoreapi_SPN }}
+        creds: ${{ secrets.managedEnv20241203044730_SPN }}
     - name: Container App deploy
       uses: azure/container-apps-deploy-action@v1
       with:
