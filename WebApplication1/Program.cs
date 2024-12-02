@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using Swashbuckle.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +70,15 @@ if (args.Contains("--swagger"))
 {
     // Only expose Swagger when running for the Swagger CLI tool
     app.UseSwagger();
+
+    // Get the Swagger JSON directly
+    var swaggerJson = app.Services.GetRequiredService<ISwaggerProvider>()
+                                    .GetSwagger("v1", null, null);
+
+    // Write Swagger JSON to a file
+    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.json");
+    File.WriteAllText(filePath, swaggerJson.ToString());
+
     app.Run();
 }
 else
