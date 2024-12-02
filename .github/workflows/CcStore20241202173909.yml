@@ -48,7 +48,7 @@ jobs:
     - name: Verify Swashbuckle CLI Tool
       run: dotnet tool list --global
     - name: Generate Swagger JSON
-      run: swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
+      run: swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}" --startup "WebApplication1.Program"
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
