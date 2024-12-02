@@ -10,7 +10,7 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure services (original setup)
+// Configure services
 var mongoConnectionString = builder.Configuration.GetValue<string>("ConnectionStrings:MongoDB");
 var mongoDatabaseName = builder.Configuration.GetValue<string>("MongoDbSettings:DatabaseName");
 
@@ -22,6 +22,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<ProductService>();
+
+// Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -62,16 +64,16 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Enable Swagger for the `swagger tofile` command
-if (args.Contains("swagger"))
+// Start the app and handle Swagger generation for CLI
+if (args.Contains("--swagger"))
 {
-    // Start application for Swagger CLI
+    // Only expose Swagger when running for the Swagger CLI tool
     app.UseSwagger();
-    app.MapControllers();
+    app.Run();
 }
 else
 {
-    // Original app pipeline
+    // Standard app pipeline for normal execution
     app.UseCors("AllowAnyOrigin");
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 

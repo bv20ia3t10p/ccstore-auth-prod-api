@@ -41,14 +41,14 @@ jobs:
     - name: Publish
       run: dotnet publish ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
     - name: Install Swashbuckle CLI .NET Global Tool
-      run: dotnet tool install Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
+      run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
       working-directory: ${{ env.WORKING_DIRECTORY }}
     - name: Add .NET Tools to PATH
       run: echo "${{ runner.tool_cache }}/dotnet/tools" >> $GITHUB_PATH
     - name: Verify Swashbuckle CLI Tool
       run: dotnet tool list --global
     - name: Generate Swagger JSON
-      run: dotnet swagger tofile --output="WebApplication1/publish/swagger.json" "WebApplication1/bin/Release/net8.0/CcStore.dll" "v1" --startup "CcStore.Program"
+      run: dotnet swagger tofile --output="WebApplication1/publish/swagger.json" "WebApplication1/bin/Release/net8.0/CcStore.dll" "v1" --startup "WebApplication1.Program" --swagger
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
