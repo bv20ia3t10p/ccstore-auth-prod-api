@@ -1,37 +1,27 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 using CcStore.Middleware;
-using CcStore.Repository;
-using CcStore.Service;
-using MongoDB.Driver;
 using CcStore.Repository.Contracts;
+using CcStore.Repository;
 using CcStore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Get MongoDB settings from configuration
+// Configure services (original setup)
 var mongoConnectionString = builder.Configuration.GetValue<string>("ConnectionStrings:MongoDB");
 var mongoDatabaseName = builder.Configuration.GetValue<string>("MongoDbSettings:DatabaseName");
 
-// Add services to the container.
 builder.Services.AddControllers();
-
-// Register MongoDB client
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoConnectionString));
 builder.Services.AddScoped<IMongoDatabase>(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDatabaseName));
-
-// Register MongoDbContext, which needs the database name and connection string
 builder.Services.AddSingleton<MongoDbContext>(sp => new MongoDbContext(mongoConnectionString, mongoDatabaseName));
-
-// Register other services and repositories
-builder.Services.AddScoped<IUserRepository,UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<ProductService>();
-
-// Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -42,7 +32,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API Documentation with JWT Authentication",
     });
 
-    // JWT Authentication definition
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -68,69 +57,34 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Add file upload filter
     options.OperationFilter<FileUploadOperationFilter>();
-});
-
-
-// Configure JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
-    };
-});
-
-// Configure CORS if needed (optional)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAnyOrigin", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
 });
 
 var app = builder.Build();
 
-// Enable CORS (optional)
-app.UseCors("AllowAnyOrigin");
-
-// Enable middleware for exception handling
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-if (app.Environment.IsDevelopment())
+// Enable Swagger for the `swagger tofile` command
+if (args.Contains("swagger"))
 {
-    app.UseDeveloperExceptionPage();
-}
-
-// Enable authentication and authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Enable Swagger UI
-if (app.Environment.IsDevelopment())
-{
+    // Start application for Swagger CLI
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "C2S-UP-Api v1"));
+    app.MapControllers();
 }
+else
+{
+    // Original app pipeline
+    app.UseCors("AllowAnyOrigin");
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Map controller routes
-app.MapControllers();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "C2S-UP-Api v1"));
+    }
 
-
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+}
 
 app.Run();
