@@ -48,7 +48,7 @@ jobs:
     - name: Verify Swashbuckle CLI Tool
       run: dotnet tool list --global
     - name: Generate Swagger JSON
-      run: swagger tofile --output "swagger.json"  "WebApplication1/bin/Release/net8.0/CcStore.dll" --startup "CcStore.Program"
+      run: swagger tofile --output="swagger.json" "CcStore.Program"
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
