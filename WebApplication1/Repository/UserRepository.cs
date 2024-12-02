@@ -105,8 +105,8 @@ namespace CcStore.Repository
         public async Task<string> Login(string username, string password)
         {
             var user = await GetUserByUsernameAsync(username) ?? throw new BadHttpRequestException("User doesnt exist");
-                if (!VerifyPassword(password, user.PasswordHash))
-                        throw new UnauthorizedAccessException("Invalid username or password");
+            if (!VerifyPassword(password, user.PasswordHash))
+                throw new UnauthorizedAccessException("Invalid username or password");
 
             var jwtToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken(user);
@@ -117,12 +117,12 @@ namespace CcStore.Repository
         }
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return (await FindByConditionAsync(u => u.Username == username)).FirstOrDefault();
+            return (await FindByConditionAsync(u => u.Username.Equals(username))).FirstOrDefault();
         }
 
         public async Task<User> GetUserByUsernameOrEmailAsync(string usernameOrEmail)
         {
-            var user = await _users.Find(u => u.Username == usernameOrEmail || u.Email == usernameOrEmail).FirstOrDefaultAsync();
+            var user = await _users.Find(u => u.Username.Equals(usernameOrEmail) || u.Email.Equals(usernameOrEmail)).FirstOrDefaultAsync();
             return user;
         }
 
@@ -162,7 +162,7 @@ namespace CcStore.Repository
         private bool VerifyPassword(string password, string storedHash)
         {
             // Hash the entered password and compare it to the stored hash
-            return storedHash == HashPassword(password);
+            return storedHash.Equals(HashPassword(password));
         }
 
         // Securely hash the password using PBKDF2

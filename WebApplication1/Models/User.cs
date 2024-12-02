@@ -7,8 +7,9 @@ namespace CcStore.Models
 	public class User
 	{
 
+        [BsonElement("_id")]
         [BsonId]
-        public ObjectId _Id { get; set; }
+        public ObjectId BsonId { get; set; }
 
         [BsonElement("id")]
         public int Id { get; set; } = 0;
