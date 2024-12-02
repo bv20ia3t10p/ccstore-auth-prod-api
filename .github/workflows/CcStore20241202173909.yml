@@ -28,13 +28,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-    - name: Setup SwashBuckle .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.SWASHBUCKLE_DOTNET_CORE_VERSION }}
-    - name: Install Swashbuckle CLI .NET Global Tool
-      run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
-      working-directory: ${{ env.WORKING_DIRECTORY }}
     - name: Add .NET Tools to PATH
       run: echo "${{ runner.tool_cache }}/dotnet/tools" >> $GITHUB_PATH
     - name: Restore
@@ -45,8 +38,6 @@ jobs:
       run: dotnet test ${{ env.WORKING_DIRECTORY }} --no-build
     - name: Publish
       run: dotnet publish ${{ env.WORKING_DIRECTORY }} --configuration ${{ env.CONFIGURATION }} --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    - name: Verify Swashbuckle CLI Tool
-      run: dotnet tool list --global
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
