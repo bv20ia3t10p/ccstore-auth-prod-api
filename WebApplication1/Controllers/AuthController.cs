@@ -101,7 +101,7 @@ namespace CcStore.Controllers
     }
 
     // Helper model for login request
-    public class LoginRequest
+    public record LoginRequest
     {
         public string Username { get; set; }
         public string Password { get; set; }

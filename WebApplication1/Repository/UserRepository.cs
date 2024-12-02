@@ -104,10 +104,9 @@ namespace CcStore.Repository
         // User login method that generates JWT and refresh tokens
         public async Task<string> Login(string username, string password)
         {
-            var user = await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
-            if (user.PasswordHash != "test" && password != "test")
-                if (user == null || !VerifyPassword(password, user.PasswordHash))
-                    throw new UnauthorizedAccessException("Invalid username or password");
+            var user = await GetUserByUsernameAsync(username) ?? throw new BadHttpRequestException("User doesnt exist");
+                if (!VerifyPassword(password, user.PasswordHash))
+                        throw new UnauthorizedAccessException("Invalid username or password");
 
             var jwtToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken(user);
