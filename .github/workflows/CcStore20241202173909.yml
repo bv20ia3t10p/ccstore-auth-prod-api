@@ -49,7 +49,7 @@ jobs:
       run: dotnet tool install --global Swashbuckle.AspNetCore.Cli --version ${{ env.SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION }}
 
     - name: Add .NET Tools to PATH
-      run: echo "::add-path::$(dotnet --info | grep -oP '(?<=global-tools)[^\n]*' | xargs)"
+      run: echo "${{ runner.tool_cache }}/dotnet/tools" >> $GITHUB_PATH
 
     - name: Generate Swagger JSON
       run: dotnet swagger tofile --output "${{ env.API_IMPORT_SPECIFICATION_PATH }}" "${{ env.API_IMPORT_DLL }}" "${{ env.API_IMPORT_VERSION }}"
