@@ -9,11 +9,11 @@ env:
   RESOURCE_GROUP: asia
   CONTAINER_REGISTRY_NAME: registry20241203053026
   CONTAINER_REGISTRY_LOGIN_SERVER: registry20241203053026.azurecr.io
-  MONGODB_CONNECTIONSTRING: ${{ secrets.connectionstrings_mongodb }}
-  CONNECTIONSTRINGS_MONGODB: ${{ secrets.connectionstrings_mongodb }}
-  GOOGLECRED: ${{ secrets.googlecred }}
-  JWTSETTINGS_SECRETKEY: ${{ secrets.jwtsettings_secretkey }}
-  SERVICEURL: ${{ secrets.serviceurl }}
+  MONGODB_CONNECTIONSTRING: ${{ secrets.CONNECTIONSTRINGS_MONGODB }}
+  CONNECTIONSTRINGS_MONGODB: ${{ secrets.CONNECTIONSTRINGS_MONGODB }}
+  GOOGLECRED: ${{ secrets.GOOGLECRED }}
+  JWTSETTINGS_SECRETKEY: ${{ secrets.JWTSETTINGS_SECRETKEY }}
+  SERVICEURL: ${{ secrets.SERVICEURL }}
 
 jobs:
   BuildAndDeployContainerApp:
