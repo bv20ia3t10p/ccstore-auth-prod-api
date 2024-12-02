@@ -71,12 +71,12 @@ builder.Services.AddSwaggerGen(options =>
     // Add file upload filter
     options.OperationFilter<FileUploadOperationFilter>();
 });
-
-
-// Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+
+
 builder.Services.AddAuthentication(options =>
 {
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;  // Set default scheme
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
