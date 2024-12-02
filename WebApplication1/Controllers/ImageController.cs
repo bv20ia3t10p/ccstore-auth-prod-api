@@ -21,8 +21,8 @@ namespace CcStore.Controllers
         public ImageController(IConfiguration configuration)
         {
             // Path to your service account JSON file
-            var credential = GoogleCredential.FromJson(configuration.GetValue<string>("GoogleCred"));
-            _serviceUrl = configuration.GetValue<string>("ServiceUrl");
+            var credential = GoogleCredential.FromJson(configuration.GetValue<string>(Environment.GetEnvironmentVariable("GOOGLECRED")));
+            _serviceUrl = Environment.GetEnvironmentVariable("SERVICEURL");
             storageClient = StorageClient.Create(credential);
         }
 

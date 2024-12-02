@@ -12,7 +12,7 @@ namespace CcStore.Repository
     public class UserRepository(IMongoDatabase database, IConfiguration configuration) : RepositoryBase<User>(database, "Users"), IUserRepository
     {
         private readonly IMongoCollection<User> _users = database.GetCollection<User>("Users");
-        private readonly string _jwtSecretKey = configuration.GetValue<string>("JwtSettings:SecretKey");
+        private readonly string _jwtSecretKey = Environment.GetEnvironmentVariable("JWTSETTINGS_SECRETKEY");
         private readonly int _jwtExpirationMinutes = 30;
 
         // Async methods to interact with the database

@@ -7,7 +7,8 @@ public class MongoDbContext
 
 	public MongoDbContext(string connectionString, string databaseName)
 	{
-		var client = new MongoClient(connectionString);
+        var mongoDbConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS_MONGODB");
+        var client = new MongoClient(mongoDbConnectionString);
 		_database = client.GetDatabase(databaseName);
 	}
 
