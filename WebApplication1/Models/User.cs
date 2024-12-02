@@ -9,7 +9,7 @@ namespace CcStore.Models
 
         [BsonElement("_id")]
         [BsonId]
-        public ObjectId BsonId { get; set; }
+        public ObjectId _Id { get; set; }
 
         [BsonElement("id")]
         public int Id { get; set; } = 0;
