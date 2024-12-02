@@ -67,41 +67,36 @@ namespace CcStore.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            try
+
+            if (loginRequest == null)
             {
-                if (loginRequest == null)
-                {
-                    return BadRequest("Username and password are required.");
-                }
-
-                var jwtToken = await _userRepository.Login(loginRequest.Username, loginRequest.Password);
-                var user = await _userRepository.GetUserByUsernameOrEmailAsync(loginRequest.Username);  // Assuming username and email are the same.
-
-                if (user == null)
-                {
-                    return Unauthorized("Invalid credentials");
-                }
-
-                // Return response including user data and tokens
-                var response = new
-                {
-                    user.Id,
-                    user.Username,
-                    user.Email,
-                    user.FirstName,
-                    user.LastName,
-                    user.Gender,
-                    user.Image,
-                    AccessToken = jwtToken,  // Access token returned
-                    RefreshToken = user.RefreshToken  // Refresh token
-                };
-
-                return Ok(response);  // Successfully logged in
+                return BadRequest("Username and password are required.");
             }
-            catch (Exception ex)
+
+            var jwtToken = await _userRepository.Login(loginRequest.Username, loginRequest.Password);
+            var user = await _userRepository.GetUserByUsernameOrEmailAsync(loginRequest.Username);  // Assuming username and email are the same.
+
+            if (user == null)
             {
-                return BadRequest($"Error occurred during login: {ex.Message}");
+                return Unauthorized("Invalid credentials");
             }
+
+            // Return response including user data and tokens
+            var response = new
+            {
+                user.Id,
+                user.Username,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.Gender,
+                user.Image,
+                AccessToken = jwtToken,  // Access token returned
+                user.RefreshToken  // Refresh token
+            };
+
+            return Ok(response);  // Successfully logged in
+
         }
     }
 
