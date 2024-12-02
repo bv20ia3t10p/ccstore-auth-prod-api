@@ -84,19 +84,23 @@ namespace CcStore.Repository
                 throw new BadHttpRequestException("User already exists"); // Or return a specific response
             }
 
-            // Hash password before inserting
+            // Hash the password securely before saving the user
             user.PasswordHash = HashPassword(user.PasswordHash);
 
-            // Create the new user
-            await CreateUserAsync(user);
+            // Insert user into the database
+            await _users.InsertOneAsync(user);
 
-            // Generate JWT token and refresh token
+            // Generate JWT token
             var jwtToken = GenerateJwtToken(user);
+
+            // Optionally, generate and assign the refresh token
             var refreshToken = GenerateRefreshToken(user);
             user.RefreshToken = refreshToken;
 
             // Update user with the refresh token
             await UpdateUserAsync(user);
+
+            // Return JWT tok
 
             return jwtToken;
         }
