@@ -29,7 +29,6 @@ namespace CcStore.Controllers
 
         // POST: api/image/upload
         [HttpPost("upload")]
-        [Authorize]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
             if (file == null || file.Length == 0)
