@@ -12,7 +12,7 @@ using CcStore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Get MongoDB settings from configuration
-var mongoConnectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTIONSTRING");
+var mongoConnectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS_MONGODB");
 var mongoDatabaseName = builder.Configuration.GetValue<string>("MongoDbSettings:DatabaseName");
 
 // Add services to the container.
