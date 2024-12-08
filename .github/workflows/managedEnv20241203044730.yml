@@ -4,7 +4,7 @@ on:
       - master
 
 env:
-  DOTNET_CORE_VERSION: 8.x.x
+  DOTNET_CORE_VERSION: 8.x
   GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
   GOOGLE_REGION: asia-southeast1
 

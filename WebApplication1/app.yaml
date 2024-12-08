@@ -1,3 +1,2 @@
 runtime: aspnetcore
 env: flex
-runtime_version: "8"  # Use the latest supported runtime version
