@@ -34,7 +34,7 @@ jobs:
     # Step 4: Build the Docker image
     - name: Build Docker image
       run: |
-        docker build -t gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+        docker build -t gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} WebApplication1/Dockerfile
 
     # Step 5: Push Docker image to Google Container Registry
     - name: Push Docker image to Google Container Registry
