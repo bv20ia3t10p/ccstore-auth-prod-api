@@ -1,42 +1,65 @@
 on:
   push:
     branches:
-    - master
+      - master
+
 env:
   DOTNET_CORE_VERSION: 8.0.x
   CONTAINER_APP_NAME: ccstore-container-app
-  CONTAINER_APP_ENVIRONMENT_NAME: managedEnv20241203044730
-  RESOURCE_GROUP: asia
-  CONTAINER_REGISTRY_NAME: registry20241203053026
-  CONTAINER_REGISTRY_LOGIN_SERVER: registry20241203053026.azurecr.io
+  GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
+  GOOGLE_REGION: asia-southeast1
   MONGODB_CONNECTIONSTRING: ${{ secrets.CONNECTIONSTRINGS_MONGODB }}
   CONNECTIONSTRINGS_MONGODB: ${{ secrets.CONNECTIONSTRINGS_MONGODB }}
-  GOOGLECRED: ${{ secrets.GOOGLECRED }}
   JWTSETTINGS_SECRETKEY: ${{ secrets.JWTSETTINGS_SECRETKEY }}
   SERVICEURL: ${{ secrets.SERVICEURL }}
 
 jobs:
   BuildAndDeployContainerApp:
     runs-on: ubuntu-latest
+
     steps:
+    # Step 1: Checkout source code
     - name: Checkout source code
       uses: actions/checkout@v4
+
+    # Step 2: Setup .NET SDK
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-    - name: Azure login
-      uses: azure/login@v2
+
+    # Step 3: Authenticate with Google Cloud
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v1
       with:
-        creds: ${{ secrets.managedEnv20241203044730_SPN }}
-    - name: Container App deploy
-      uses: azure/container-apps-deploy-action@v1
-      with:
-        appSourcePath: ${{ github.workspace }}
-        acrName: ${{ env.CONTAINER_REGISTRY_NAME }}
-        acrUsername: ${{ secrets.registry20241203053026_USERNAME_3D47 }}
-        acrPassword: ${{ secrets.registry20241203053026_PASSWORD_3D47 }}
-        imageToBuild: ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.CONTAINER_APP_NAME }}:${{ github.sha }}
-        containerAppName: ${{ env.CONTAINER_APP_NAME }}
-        containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT_NAME }}
-        resourceGroup: ${{ env.RESOURCE_GROUP }}
+        credentials_json: ${{ secrets.GOOGLECRED }}
+
+    # Step 4: Configure gcloud CLI
+    - name: Configure Google Cloud
+      run: |
+        gcloud config set project ${{ env.GOOGLE_PROJECT_ID }}
+        gcloud config set compute/region ${{ env.GOOGLE_REGION }}
+
+    # Step 5: Build the Docker image
+    - name: Build Docker image
+      run: |
+        IMAGE_NAME=gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.CONTAINER_APP_NAME }}
+        docker build -t $IMAGE_NAME .
+        echo $IMAGE_NAME > image-name.txt
+
+    # Step 6: Push the Docker image to Google Container Registry (GCR)
+    - name: Push Docker image to GCR
+      run: |
+        IMAGE_NAME=$(cat image-name.txt)
+        docker push $IMAGE_NAME
+
+    # Step 7: Deploy to Google Cloud Run
+    - name: Deploy to Google Cloud Run
+      run: |
+        IMAGE_NAME=$(cat image-name.txt)
+        gcloud run deploy ${{ env.CONTAINER_APP_NAME }} \
+          --image $IMAGE_NAME \
+          --platform managed \
+          --region ${{ env.GOOGLE_REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars MONGODB_CONNECTIONSTRING=${{ env.MONGODB_CONNECTIONSTRING }},JWTSETTINGS_SECRETKEY=${{ env.JWTSETTINGS_SECRETKEY }},SERVICEURL=${{ env.SERVICEURL }}
