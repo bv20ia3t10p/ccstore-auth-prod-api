@@ -4,9 +4,11 @@ on:
       - master
 
 env:
-  DOTNET_CORE_VERSION: 6.x
+  DOTNET_CORE_VERSION: 8.x
   GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
   GOOGLE_REGION: asia-southeast1
+  IMAGE_NAME: ccstore-app
+  IMAGE_TAG: latest
 
 jobs:
   BuildAndDeployApp:
@@ -17,7 +19,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Step 2: Set up .NET SDK
+    # Step 2: Set up .NET SDK (not strictly needed for containerization, but can be useful for debugging)
     - name: Set up .NET SDK
       uses: actions/setup-dotnet@v4
       with:
@@ -29,16 +31,22 @@ jobs:
       with:
         credentials_json: ${{ secrets.GOOGLECRED }}
 
-    # Step 4: Configure Google Cloud
-    - name: Configure Google Cloud
+    # Step 4: Build the Docker image
+    - name: Build Docker image
       run: |
-        gcloud config set project ${{ env.GOOGLE_PROJECT_ID }}
-        gcloud config set compute/region ${{ env.GOOGLE_REGION }}
+        docker build -t gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
 
-    # Step 5: Deploy to App Engine
-    - name: Deploy to App Engine
+    # Step 5: Push Docker image to Google Container Registry
+    - name: Push Docker image to Google Container Registry
       run: |
-        dotnet restore
-        dotnet publish -c Release -o ./publish
-        cp WebApplication1/app.yaml ./publish/  # Adjust the path to the app.yaml file
-        gcloud app deploy ./publish/app.yaml --quiet
+        docker push gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+    # Step 6: Deploy to Cloud Run (or GKE)
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.IMAGE_NAME }} \
+          --image gcr.io/${{ env.GOOGLE_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+          --platform managed \
+          --region ${{ env.GOOGLE_REGION }} \
+          --allow-unauthenticated \
+          --quiet
