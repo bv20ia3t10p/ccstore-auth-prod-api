@@ -40,5 +40,5 @@ jobs:
       run: |
         dotnet restore
         dotnet publish -c Release -o ./publish
-        cp app.yaml ./publish/
+        cp CcStore/app.yaml ./publish/  # Adjust the path to the app.yaml file
         gcloud app deploy ./publish/app.yaml --quiet
